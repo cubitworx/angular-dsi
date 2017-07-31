@@ -1,0 +1,44 @@
+<div class="box-body" [formGroup]="_dsi.test.formGroup">
+	<div class="row">
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label for="field_1">Field 1</label>
+				<input type="text" class="form-control" id="field_1" placeholder="Field 1" formControlName="field_1" />
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label for="field_2">Field 2</label>
+				<select id="field_2" class="form-control" formControlName="field_2">
+					<option *ngFor="let valuelist of _dsi.valuelist1" value="{{valuelist._key}}">{{valuelist._value}}</option>
+				</select>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label for="field_3">Field 3</label>
+				<select id="field_3" class="form-control" formControlName="field_3">
+					<option *ngFor="let valuelist of _dsi.valuelist2" value="{{valuelist._key}}">{{valuelist._value}}</option>
+				</select>
+			</div>
+		</div>
+
+		<div *ngIf="_dsi.test.errors" class="col-xs-12">
+			<div class="alert alert-danger" role="alert">
+				<span class="sr-only">Error:</span>
+				<div *ngFor="let error of _dsi.test.errors">{{error}}</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="box-footer">
+		<div class="btn-group pull-right">
+			<a class="btn btn-default" [routerLink]="['/admin/job/list']">Cancel</a>
+		</div>
+		<div class="btn-group pull-right">
+			<button type="button" (click)="_dsi.test.save()" class="btn btn-success">Save</button>
+		</div>
+	</div>
+
+</div>

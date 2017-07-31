@@ -1,0 +1,6 @@
+config/
+demo/
+src/
+**/*.spec.js
+**/*.spec.js.map
+**/tsconfig*.json

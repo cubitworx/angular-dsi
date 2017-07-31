@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<base href="<%= htmlWebpackPlugin.options.metadata.baseUrl %>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  	<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title><%= htmlWebpackPlugin.options.metadata.title %></title>
+
+  	<meta name="description" content="<%= htmlWebpackPlugin.options.metadata.title %>">
+
+  </head>
+  <body>
+
+    <app>Loading...</app>
+
+		<% if (htmlWebpackPlugin.options.metadata.isDevServer && htmlWebpackPlugin.options.metadata.HMR !== true) { %>
+		<!-- Webpack Dev Server reload -->
+		<script src="/webpack-dev-server.js"></script>
+		<% } %>
+
+  </body>
+</html>
