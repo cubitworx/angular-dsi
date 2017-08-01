@@ -1,47 +1,35 @@
-import { Injectable, NgZone, Type } from '@angular/core';
-// import { Http } from '@angular/http';
-// import { I18nService } from '../../modules/angular-i18n';
-// import { DialogService } from '../../modules/angular-modal';
-// import { NotificationsService } from 'angular2-notifications';
-// import { PaginationOptions, PaginationService } from '../../modules/angular-paginator';
-// import { RestAngular2 } from '../../modules/js-rest';
-
-// App
-// import { HttpService } from '../core';
+import { Injectable } from '@angular/core';
+import * as _ from 'lodash';
 
 // Local
-import { Dsi, DsiOptions, Doc } from './dsi';
-import { DsiDriver } from './dsi.driver';
-import { DsiServiceOptions } from './dsi.service';
-// import { DbiHttpService } from './dbi-http.service';
-// import { LoggerService } from '../logger';
-
-// export interface DsiServiceOptions {
-// 	class: Type<Dsi<any>>;
-// 	id: string;
-// }
+import { DsiInterface } from './dsi.interface';
 
 @Injectable()
 export class DsiRegistry {
 
-	protected static _instances: Dsi<any, any>[] = [];
+	protected _instances: {[id: string]: DsiInterface<any>} = {};
 
-	public constructor(
-		protected _dsi: Type<Dsi<any, any>>,
-		protected _driver: DsiDriver<any>,
-		protected _ngZone: NgZone
-	) { }
+	public add(dsi: DsiInterface<any>): DsiRegistry {
+		if (!this._instances[dsi.id])
+			this._instances[dsi.id] = dsi;
 
-	public instance<O extends DsiServiceOptions<O, T>, T extends Doc>(options: O): Dsi<O, T> {
-		if (!DsiRegistry._instances[options.id]) {
-			DsiRegistry._instances[options.id] = new options.dsi(
-				this._ngZone,
-				this._driver,
-				options
-			);
+		return this;
+	}
+
+	public get(id: string): DsiInterface<any> {
+		return this._instances[id] || null;
+	}
+
+	public remove(id?: string|string[]): DsiRegistry {
+		let ids: string[] = id ? ( _.isArray(id) ? id : [id] ) : Object.keys(this._instances);
+
+		for (let id in ids) {
+			if( this._instances[id] )
+				this._instances[id].stop();
+			this._instances[id] = null;
 		}
 
-		return DsiRegistry._instances[options.id]
+		return this;
 	}
 
 }

@@ -1,1 +1,2 @@
-export { testDsiOptions } from './test.dsi';
+export * from './event.dsi';
+export * from './status.dsi';

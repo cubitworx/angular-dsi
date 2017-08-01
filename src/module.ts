@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule, ModuleWithProviders } from '@angular/core';
 
 // Local
-import { DsiService } from './dsi.service';
+import { DsiRegistry } from './dsi.registry';
 
 @NgModule({
 	declarations: [
@@ -19,7 +19,7 @@ export class DsiModule {
 		return {
 			ngModule: DsiModule,
 			providers: [
-				DsiService
+				DsiRegistry
 			]
 		};
 	}

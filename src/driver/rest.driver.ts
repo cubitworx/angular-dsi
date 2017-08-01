@@ -1,39 +1,32 @@
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 
 // Local
 import { HttpRestService } from '../rest/http.service';
 import { DsiApi } from '../dsi.api';
-import { Doc } from '../dsi';
+import { TableSchema } from '../support/schema';
 import { DsiDriver } from '../dsi.driver';
 
 @Injectable()
-export class DsiRestDriver<T extends Doc> implements DsiDriver<T> {
+export class DsiRestDriver<T> implements DsiDriver<T> {
 
 	protected _request: DsiApi.Request = {};
-	protected _resource: string;
-	protected _subscriptions: {
-		dsi?: Subscription,
-		pagination?: Subscription
-	} = {};
-	protected _url: string;
+	protected _uri: string = '/api';
 
 	public constructor(
 		protected _restHttpService: HttpRestService
-	) {
-		this._url = `/api/${this._resource}`;
+	) { }
+
+	public create(resource: string, doc: T): Observable<string> {
+    return this._restHttpService.post(`${this._uri}/${resource}`, doc);
 	}
 
-	public create(doc: T): Observable<string> {
-    return this._restHttpService.post(this._url, doc);
+	public delete(resource: string, id: string): Observable<number> {
+    return this._restHttpService.delete( `${this._uri}/${resource}/${id}` );
 	}
 
-	public delete(id: string): Observable<number> {
-    return this._restHttpService.delete( `${this._url}/${id}` );
-	}
-
-	public read(request?: DsiApi.Request, reactive: boolean = false): Observable<DsiApi.Response> {
+	public read(resource: string, request?: DsiApi.Request): Observable<DsiApi.Response> {
 		let params: {[name: string]: any} = {};
 
 		request = _.merge(this._request, request || {});
@@ -60,15 +53,12 @@ export class DsiRestDriver<T extends Doc> implements DsiDriver<T> {
 		if( request.sort )
 			params.sort = request.sort.join(',');
 
-		let result = this._restHttpService.get(this._url, params);
-
-		if (!reactive)
-			result = result.first();
+		let result = this._restHttpService.get(`${this._uri}/${resource}`, params);
 
 		return result;
 	}
 
-	public readOne(request?: DsiApi.RequestOne, reactive: boolean = false): Observable<DsiApi.Response> {
+	public readOne(resource: string, request?: DsiApi.RequestOne, reactive: boolean = false): Observable<DsiApi.Response> {
 		let params: {[name: string]: any} = {};
 
 		request = _.merge(this._request, request || {});
@@ -81,7 +71,7 @@ export class DsiRestDriver<T extends Doc> implements DsiDriver<T> {
 		if( request.fields )
 				params.fields = request.fields;
 
-		let result = this._restHttpService.get(this._url, params);
+		let result = this._restHttpService.get(`${this._uri}/${resource}`, params);
 
 		if (!reactive)
 			result = result.first();
@@ -89,8 +79,8 @@ export class DsiRestDriver<T extends Doc> implements DsiDriver<T> {
 		return result;
 	}
 
-	public update(id: string, doc: any): Observable<T> {
-    return this._restHttpService.put(`${this._url}/${id}`, doc);
+	public update(resource: string, id: string, doc: any): Observable<T> {
+    return this._restHttpService.put(`${this._uri}/${resource}/${id}`, doc);
 	}
 
 }

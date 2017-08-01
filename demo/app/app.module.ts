@@ -1,16 +1,18 @@
-import { NgModule } from '@angular/core';
+import { NgModule, NgZone } from '@angular/core';
 import { BrowserModule }  from '@angular/platform-browser';
 import { BootstrapModalModule, DialogService } from 'ng2-bootstrap-modal';
 
-import { Dsi, DsiModule, HttpRestService } from '../../src';
+import { DsiDataset, DsiDriver, DsiFormGroup, DsiModule, DsiRegistry, HttpRestService } from '../../src';
 
 // Local
 import { AppDsi } from '../lib/dsi/app.dsi';
+import { AppDsiDatasetFactory } from '../lib/dsi/app.dsi.dataset';
+import { AppDsiFormGroupFactory } from '../lib/dsi/app.dsi.formGroup';
 import { AppHttpRestService } from '../lib/rest/app.http.service';
 import { ConfirmDialogComponent } from '../support/confirm-dialog.component';
 import { AppComponent } from './app.component';
-import { TestListComponent } from './test-list.component';
-import { TestFormComponent } from './test-form.component';
+import { EventListComponent } from './event-list.component';
+import { EventFormComponent } from './event-form.component';
 import { appRouting } from './app.routing';
 
 @NgModule({
@@ -18,8 +20,8 @@ import { appRouting } from './app.routing';
 	declarations: [
 		AppComponent,
 		ConfirmDialogComponent,
-		TestListComponent,
-		TestFormComponent
+		EventListComponent,
+		EventFormComponent
 	],
 	entryComponents: [
 		ConfirmDialogComponent
@@ -31,9 +33,13 @@ import { appRouting } from './app.routing';
 		DsiModule
 	],
 	providers: [
-		{ provide: AppHttpRestService, useValue: HttpRestService },
-		{ provide: AppDsi, useValue: Dsi },
-		DialogService
+		{ provide: HttpRestService, useClass: AppHttpRestService },
+		{ provide: DsiDataset, useFactory: AppDsiDatasetFactory, deps: [AppDsi, NgZone] },
+		{ provide: DsiFormGroup, useFactory: AppDsiFormGroupFactory, deps: [AppDsi, NgZone] },
+		DialogService,
+		DsiDataset,
+		DsiFormGroup,
+		DsiRegistry
 	]
 })
 export class AppModule { }

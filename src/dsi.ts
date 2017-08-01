@@ -1,105 +1,39 @@
-import { NgZone } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs';
-import * as _ from 'lodash';
+import { Injectable, NgZone } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 
 // Local
 import { DsiApi } from './dsi.api';
 import { DsiDriver } from './dsi.driver';
+import { TableSchema } from './support/schema';
 
-export type DsiOptions = {
-	id: string;
-};
-
-export type Doc = {
-	id: string;
-	[field: string]: any;
-};
-
-export class Dsi<O extends DsiOptions, T extends Doc> {
-
-	protected _options: O;
-	protected _subscriptions: {
-		dsi?: Subscription
-	} = {};
+@Injectable()
+export class Dsi<T> {
 
 	public constructor(
 		protected _dsiDriver: DsiDriver<T>,
-		protected _ngZone: NgZone,
-		options: O
-	) {
-		_.defaultsDeep(this._options, options);
+		protected _ngZone: NgZone
+	) { }
+
+	public create(resource: string, doc: T): Observable<string> {
+		return this._dsiDriver.create(resource, doc);
 	}
 
-	public create(doc: T): Observable<string> {
-		return this._dsiDriver.create(doc);
+	public delete(resource: string, id: string): Observable<number> {
+		return this._dsiDriver.delete(resource, id);
 	}
 
-	public delete(id: string): Observable<number> {
-		return this._dsiDriver.delete(id);
+	public read(resource: string, request?: DsiApi.Request, reactive: boolean = false): Observable<DsiApi.Response> {
+		return this._dsiDriver.read(resource, request, reactive);
 	}
 
-	public read(request?: DsiApi.Request, reactive: boolean = false): Observable<T[]> {
-		let
-		resultSubject = new Subject<T[]>(),
-		result = this._dsiDriver.read(request, reactive);
-
-		if( this._subscriptions.dsi )
-			this._subscriptions.dsi.unsubscribe();
-
-		if (!reactive)
-			result = result.first();
-
-		this._subscriptions.dsi = result.subscribe((result: DsiApi.Response) => {
-			this._ngZone.run(() => {
-				let dataset = [];
-				for( let record of result.data )
-					dataset.push( record );
-				resultSubject.next(dataset);
-			});
-		});
-
-		return resultSubject.asObservable();
+	public readOne(resource: string, request?: DsiApi.RequestOne, reactive: boolean = false): Observable<DsiApi.Response> {
+		return this._dsiDriver.readOne(resource, request, reactive);
 	}
 
-	public readOne(request?: DsiApi.Request, reactive: boolean = false): Observable<T> {
-		let
-		resultSubject = new Subject<T>(),
-		result = this._dsiDriver.readOne(request, reactive);
+	public update(resource: string, id: string, doc: T): Observable<T> {
+		let resultSubject = new Subject<T>();
 
-		if( this._subscriptions.dsi )
-			this._subscriptions.dsi.unsubscribe();
-
-		if (!reactive)
-			result = result.first();
-
-		this._subscriptions.dsi = result.subscribe((data: T) => {
-			this._ngZone.run(() => {
-				let doc: T = <T>{};
-				for( let key in data )
-					doc[key] = data[key];
-				resultSubject.next(doc);
-			});
-		});
-
-		return resultSubject.asObservable();
-	}
-
-	public stop() {
-		for( let name in this._subscriptions ) {
-			if( this._subscriptions[name] )
-				this._subscriptions[name].unsubscribe();
-			this._subscriptions[name] = null;
-		}
-
-		return this;
-	}
-
-	public update(id: string, doc: T): Observable<T> {
-		let
-		resultSubject = new Subject<T>(),
-		result = this._dsiDriver.update(id, doc);
-
-		this._subscriptions.dsi = result.first().subscribe((result: DsiApi.Response) => {
+		this._dsiDriver.update(resource, id, doc).first().subscribe((result: DsiApi.Response) => {
 			this._ngZone.run(() => {
 				resultSubject.next(result.data);
 			});

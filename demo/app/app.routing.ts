@@ -2,14 +2,14 @@ import { ModuleWithProviders, Type }      from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 // Local
-import { TestListComponent } from './test-list.component';
-import { TestFormComponent } from './test-form.component';
+import { EventListComponent } from './event-list.component';
+import { EventFormComponent } from './event-form.component';
 
 const APP_ROUTES: Routes = [
-	{ path: '', redirectTo: 'test/list', pathMatch: 'full' },
+	{ path: '', redirectTo: 'event/list', pathMatch: 'full' },
 
-	{ path: 'test/list', component: TestListComponent },
-	{ path: 'test/:id', component: TestFormComponent }
+	{ path: 'event/list', component: EventListComponent },
+	{ path: 'event/:id', component: EventFormComponent }
 ];
 
 export const appRouting: ModuleWithProviders = RouterModule.forRoot( APP_ROUTES );
