@@ -8,9 +8,9 @@
 			<p>{{message}}</p>
 		</div>
 		<div class="modal-footer">
-			<ng-content *ngFor="let button of buttons">
+			<ng-container *ngFor="let button of buttons">
 				<button type="button" [ngClass]="button.class || 'btn btn-default'" (click)="confirm(button.result)">{{button.title}}</button>
-			</ng-content>
+			</ng-container>
 		</div>
 	</div>
 </div>

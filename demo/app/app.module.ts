@@ -1,11 +1,13 @@
 import { NgModule, NgZone } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { BrowserModule }  from '@angular/platform-browser';
+import { NotificationsService } from 'angular2-notifications';
 import { BootstrapModalModule, DialogService } from 'ng2-bootstrap-modal';
 
-import { DsiDataset, DsiDriver, DsiFormGroup, DsiModule, DsiRegistry, HttpRestService } from '../../src';
+import { Dsi, DsiDataset, DsiDriver, DsiFilter, DsiFormGroup, HttpRestService } from '../../src';
 
 // Local
-import { AppDsi } from '../lib/dsi/app.dsi';
+import { AppDsi, AppDsiFactory } from '../lib/dsi/app.dsi';
 import { AppDsiDatasetFactory } from '../lib/dsi/app.dsi.dataset';
 import { AppDsiFormGroupFactory } from '../lib/dsi/app.dsi.formGroup';
 import { AppHttpRestService } from '../lib/rest/app.http.service';
@@ -29,17 +31,15 @@ import { appRouting } from './app.routing';
 	imports: [
 		appRouting,
 		BootstrapModalModule,
-		BrowserModule,
-		DsiModule
+		BrowserModule
 	],
 	providers: [
-		{ provide: HttpRestService, useClass: AppHttpRestService },
+		{ provide: Dsi, useFactory: AppDsiFactory, deps: [DialogService, DsiDriver, NgZone, NotificationsService] },
 		{ provide: DsiDataset, useFactory: AppDsiDatasetFactory, deps: [AppDsi, NgZone] },
-		{ provide: DsiFormGroup, useFactory: AppDsiFormGroupFactory, deps: [AppDsi, NgZone] },
+		{ provide: DsiFormGroup, useFactory: AppDsiFormGroupFactory, deps: [AppDsi, FormBuilder, NgZone] },
+		{ provide: HttpRestService, useClass: AppHttpRestService },
 		DialogService,
-		DsiDataset,
-		DsiFormGroup,
-		DsiRegistry
+		DsiFilter
 	]
 })
 export class AppModule { }

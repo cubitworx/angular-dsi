@@ -1,6 +1,6 @@
 // Local
+import { AppDsiConfig } from '../lib/dsi/app.dsi.config';
 import { EventInterface, EventSchema } from '../model';
-import { AppDsiConfig } from '../lib/dsi/app.dsi';
 
 export const EventDsiConfig: AppDsiConfig = {
 	createSuccess: {

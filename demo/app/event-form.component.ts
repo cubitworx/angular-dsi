@@ -2,10 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { DsiDatasetFactory, DsiFormGroup, DsiFormGroupFactory, DsiRegistry } from '../../src';
+import { DsiDataset, DsiDatasetFactory, DsiFormGroup, DsiFormGroupFactory } from '../../src';
 
 // Local
 import { EventDsiConfig, StatusDsiConfig } from '../dsi';
+import { AppDsiConfig } from '../lib/dsi/app.dsi.config';
 import { EventInterface } from '../model';
 
 @Component({
@@ -14,23 +15,23 @@ import { EventInterface } from '../model';
 })
 export class EventFormComponent implements OnDestroy, OnInit {
 
-	protected _event: DsiFormGroup<EventInterface>;
+	protected _event: DsiFormGroup<EventInterface, AppDsiConfig>;
+	protected _statuses: DsiDataset<EventInterface, AppDsiConfig>;
 
 	constructor(
 		protected _activatedRoute: ActivatedRoute,
-    protected _dsiDatasetFactory: DsiDatasetFactory,
-    protected _dsiFormGroupFactory: DsiFormGroupFactory,
-    protected _dsiRegistry: DsiRegistry
+		protected _dsiDataset: DsiDatasetFactory,
+		protected _dsiFormGroup: DsiFormGroupFactory
 	) { }
 
 	public ngOnDestroy(): void {
-		this._dsiRegistry.remove([EventDsiConfig.id, StatusDsiConfig.id]);
+		this._statuses.stop();
+		this._event.stop();
 	}
 
 	public ngOnInit(): void {
-		this._dsiRegistry
-			.add( this._dsiFormGroupFactory(this._activatedRoute.params.map(params => params.id), EventDsiConfig) )
-			.add( this._dsiDatasetFactory(StatusDsiConfig) );
+		this._event = this._dsiFormGroup(this._activatedRoute.params.map(params => params.id), EventDsiConfig);
+		this._statuses = this._dsiDataset(StatusDsiConfig);
 	}
 
 }

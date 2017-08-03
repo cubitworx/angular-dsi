@@ -1,28 +1,30 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
+import * as _ from 'lodash';
 
 // Local
 import { Dsi } from './dsi';
 import { DsiApi } from './dsi.api';
 import { DsiConfig } from './dsi.config';
-import { DsiInterface } from './dsi.interface';
 import { TableSchema } from './support/schema';
 
-@Injectable()
-export class DsiDataset<T> implements DsiInterface<T> {
+export type DsiDatasetFactory = (config: DsiConfig) => DsiDataset<any, any>;
 
-	protected _dataset: T[] = [];
+@Injectable()
+export class DsiDataset<D, C extends DsiConfig> {
+
+	protected _request: DsiApi.Request = {};
+	protected _dataset: D[] = [];
 	protected _subscriptions: {
 		dsi?: Subscription
 	} = {};
 
 	public constructor(
-		protected _config: DsiConfig,
-		protected _dsi: Dsi<T>,
-		protected _ngZone: NgZone
+		protected _config: C,
+		protected _dsi: Dsi<D, C>
 	) { }
 
-	public get dataset(): T[] {
+	public get dataset(): D[] {
 		return this._dataset;
 	}
 
@@ -30,29 +32,29 @@ export class DsiDataset<T> implements DsiInterface<T> {
 		return this._config.id;
 	}
 
-	public create(doc: T): Observable<string> {
-		return this._dsi.create(this._config.resource, doc);
+	public create(doc: D): Observable<string> {
+		return this._dsi.create(doc);
 	}
 
 	public delete(id: string): Observable<number> {
-		return this._dsi.delete(this._config.resource, id);
+		return this._dsi.delete(id);
 	}
 
-	public read(resource: string, request?: DsiApi.Request, reactive: boolean = false): DsiDataset<T> {
-		let result = this._dsi.readOne(resource, request, reactive);
+	public read(request?: DsiApi.Request, reactive: boolean = false): DsiDataset<D, C> {
+		request = _.merge(this._request, request || {});
 
-		if( this._subscriptions.dsi )
+		let result = this._dsi.readOne(request);
+
+		if (this._subscriptions.dsi)
 			this._subscriptions.dsi.unsubscribe();
 
 		if (!reactive)
 			result = result.first();
 
-		this._subscriptions.dsi = result.subscribe((result: DsiApi.Response) => {
-			this._ngZone.run(() => {
-				this._dataset.length = 0;
-				for( let record of result.data )
-					this._dataset.push( record );
-			});
+		this._subscriptions.dsi = result.subscribe((response: DsiApi.Response) => {
+			this._dataset.length = 0;
+			for (let record of response.data)
+				this._dataset.push( record );
 		});
 
 		return this;
@@ -66,8 +68,8 @@ export class DsiDataset<T> implements DsiInterface<T> {
 		}
 	}
 
-	public update(id: string, doc: T): Observable<T> {
-		return this._dsi.update(this._config.resource, id, doc);
+	public update(id: string, doc: D): Observable<number> {
+		return this._dsi.update(id, doc);
 	}
 
 }

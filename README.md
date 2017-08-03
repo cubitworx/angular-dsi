@@ -10,7 +10,7 @@
 
 ## About
 
-Angular datasource abstraction built around Rxjs
+Angular datasource abstraction built around rxjs
 
 ## License
 

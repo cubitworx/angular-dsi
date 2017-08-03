@@ -1,8 +1,8 @@
 {
-	"name": "@cubitworx/rx-dataset",
+	"name": "@cubitworx/angular-dsi",
 	"version": "0.1.0",
-	"license": "MIT",
-	"description": "Angular datasource abtraction built around Rxjs",
+	"license": "UNLICENSED",
+	"description": "Angular datasource abtraction built around rxjs",
 	"module": "./src",
 	"typings": "./src",
 	"scripts": {},

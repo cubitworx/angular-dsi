@@ -1,19 +1,17 @@
-import { NgZone } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 import { Dsi, DsiConfig, DsiFormGroup, DsiFormGroupFactory } from '../../../src';
 
-const instances: {[id: string]: DsiFormGroup<any>} = {};
+const instances: {[id: string]: DsiFormGroup<any, any>} = {};
 
-export function AppDsiFactory(
-	dsi: Dsi<any>,
-	formBuilder: FormBuilder,
-	ngZone: NgZone
+export function AppDsiFormGroupFactory(
+	dsi: Dsi<any, any>,
+	formBuilder: FormBuilder
 ): DsiFormGroupFactory {
-	return (id: Observable<string>, config: DsiConfig): DsiFormGroup<any> => {
+	return (id: Observable<string>, config: DsiConfig): DsiFormGroup<any, any> => {
 		if (!instances[config.id])
-			instances[config.id] = new DsiFormGroup(config, dsi, formBuilder, id, ngZone);
+			instances[config.id] = new DsiFormGroup(config, dsi, formBuilder, id);
 		return instances[config.id];
 	};
 }

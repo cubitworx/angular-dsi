@@ -1,35 +1,35 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 
-import { DsiDataset, DsiDatasetFactory, DsiFilter, DsiRegistry } from '../../src';
+import { DsiDataset, DsiDatasetFactory, DsiFilter } from '../../src';
 
 // Local
 import { EventDsiConfig, StatusDsiConfig } from '../dsi';
+import { AppDsiConfig } from '../lib/dsi/app.dsi.config';
 import { EventInterface } from '../model';
 
 @Component({
-	selector: 'list-component',
-	styleUrls: ['./list.component.scss'],
-	templateUrl: './list.component.html'
+	selector: 'event-list',
+	templateUrl: './event-list.component.html'
 })
 export class EventListComponent implements OnDestroy, OnInit {
 
-	protected _events: DsiDataset<EventInterface>;
+	protected _events: DsiDataset<EventInterface, AppDsiConfig>;
+	protected _filter: Subject<Event>;
 
 	constructor(
-    protected _dsiDatasetFactory: DsiDatasetFactory,
-    protected _dsiRegistry: DsiRegistry,
-    protected _dsiFilter: DsiFilter
+		protected _dsiDataset: DsiDatasetFactory,
+		protected _dsiFilter: DsiFilter
 	) { }
 
 	public ngOnDestroy(): void {
-		this._dsiFilter.remove(EventDsiConfig.id);
-		this._dsiRegistry.remove(EventDsiConfig.id);
+		this._dsiFilter.stop(EventDsiConfig.id);
+		this._events.stop();
 	}
 
 	public ngOnInit(): void {
-		this._dsiRegistry.add( this._dsiDatasetFactory(EventDsiConfig) );
-		this._dsiFilter.add( this._dsiRegistry.get(EventDsiConfig.id) );
+		this._events = this._dsiDataset(EventDsiConfig);
+		this._filter = this._dsiFilter.dsi(EventDsiConfig.id, this._events);
 	}
 
 }

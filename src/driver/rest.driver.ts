@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import * as _ from 'lodash';
+import { Injectable, NgZone } from '@angular/core';
 import { Observable } from 'rxjs';
+import * as _ from 'lodash';
 
 // Local
 import { HttpRestService } from '../rest/http.service';
@@ -9,78 +9,92 @@ import { TableSchema } from '../support/schema';
 import { DsiDriver } from '../dsi.driver';
 
 @Injectable()
-export class DsiRestDriver<T> implements DsiDriver<T> {
+export class DsiRestDriver<D> implements DsiDriver<D> {
 
-	protected _request: DsiApi.Request = {};
 	protected _uri: string = '/api';
 
 	public constructor(
+		protected _ngZone: NgZone,
 		protected _restHttpService: HttpRestService
 	) { }
 
-	public create(resource: string, doc: T): Observable<string> {
-    return this._restHttpService.post(`${this._uri}/${resource}`, doc);
+	public create(resource: string, doc: D): Observable<string> {
+		return this._restHttpService.post(`${this._uri}/${resource}`, doc)
+			.map(response => {
+				return this._ngZone.run(() => response.data);
+			})
+			.publishReplay()
+			.refCount();
 	}
 
 	public delete(resource: string, id: string): Observable<number> {
-    return this._restHttpService.delete( `${this._uri}/${resource}/${id}` );
+		return this._restHttpService.delete( `${this._uri}/${resource}/${id}` )
+			.map(response => {
+				return this._ngZone.run(() => response.data);
+			})
+			.publishReplay()
+			.refCount();
 	}
 
 	public read(resource: string, request?: DsiApi.Request): Observable<DsiApi.Response> {
 		let params: {[name: string]: any} = {};
 
-		request = _.merge(this._request, request || {});
-
 		// Fields
-		if( request.fields )
+		if (request.fields)
 				params.fields = request.fields;
 
 		// Filter
-		if( request.filter ) {
+		if (request.filter) {
 			params.filter = encodeURIComponent(request.filter);
 		}
 
 		// Page
-		if( request.pagination ) {
+		if (request.pagination) {
 			params.page = {};
-			if( request.pagination.page )
+			if (request.pagination.page)
 				params.page.number = request.pagination.page;
-			if( request.pagination.size )
+			if (request.pagination.size)
 				params.page.size = request.pagination.size;
 		}
 
 		// Sort
-		if( request.sort )
+		if (request.sort)
 			params.sort = request.sort.join(',');
 
-		let result = this._restHttpService.get(`${this._uri}/${resource}`, params);
-
-		return result;
+		return this._restHttpService.get(`${this._uri}/${resource}`, params)
+			.map(response => {
+				return this._ngZone.run(() => response);
+			})
+			.publishReplay()
+			.refCount();
 	}
 
-	public readOne(resource: string, request?: DsiApi.RequestOne, reactive: boolean = false): Observable<DsiApi.Response> {
+	public readOne(resource: string, request?: DsiApi.RequestOne): Observable<DsiApi.Response> {
 		let params: {[name: string]: any} = {};
 
-		request = _.merge(this._request, request || {});
-
 		// Id
-		if( request.id )
+		if (request.id)
 			params.id = request.id;
 
 		// Fields
-		if( request.fields )
+		if (request.fields)
 				params.fields = request.fields;
 
-		let result = this._restHttpService.get(`${this._uri}/${resource}`, params);
-
-		if (!reactive)
-			result = result.first();
-
-		return result;
+		return this._restHttpService.get(`${this._uri}/${resource}`, params)
+			.map(response => {
+				return this._ngZone.run(() => response);
+			})
+			.publishReplay()
+			.refCount();
 	}
 
-	public update(resource: string, id: string, doc: any): Observable<T> {
-    return this._restHttpService.put(`${this._uri}/${resource}/${id}`, doc);
+	public update(resource: string, id: string, doc: any): Observable<number> {
+		return this._restHttpService.put(`${this._uri}/${resource}/${id}`, doc)
+			.map(response => {
+				return this._ngZone.run(() => response.data);
+			})
+			.publishReplay()
+			.refCount();
 	}
 
 }

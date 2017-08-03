@@ -1,45 +1,40 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 // Local
 import { DsiApi } from './dsi.api';
+import { DsiConfig } from './dsi.config';
 import { DsiDriver } from './dsi.driver';
 import { TableSchema } from './support/schema';
 
+export type DsiFactory = (config: DsiConfig) => Dsi<any, any>;
+
 @Injectable()
-export class Dsi<T> {
+export class Dsi<D, C extends DsiConfig> {
 
 	public constructor(
-		protected _dsiDriver: DsiDriver<T>,
-		protected _ngZone: NgZone
+		protected _config: C,
+		protected _dsiDriver: DsiDriver<D>
 	) { }
 
-	public create(resource: string, doc: T): Observable<string> {
-		return this._dsiDriver.create(resource, doc);
+	public create(doc: D): Observable<string> {
+		return this._dsiDriver.create(this._config.resource, doc);
 	}
 
-	public delete(resource: string, id: string): Observable<number> {
-		return this._dsiDriver.delete(resource, id);
+	public delete(id: string): Observable<number> {
+		return this._dsiDriver.delete(this._config.resource, id);
 	}
 
-	public read(resource: string, request?: DsiApi.Request, reactive: boolean = false): Observable<DsiApi.Response> {
-		return this._dsiDriver.read(resource, request, reactive);
+	public read(request?: DsiApi.Request): Observable<DsiApi.Response> {
+		return this._dsiDriver.read(this._config.resource, request);
 	}
 
-	public readOne(resource: string, request?: DsiApi.RequestOne, reactive: boolean = false): Observable<DsiApi.Response> {
-		return this._dsiDriver.readOne(resource, request, reactive);
+	public readOne(request?: DsiApi.RequestOne): Observable<DsiApi.Response> {
+		return this._dsiDriver.readOne(this._config.resource, request);
 	}
 
-	public update(resource: string, id: string, doc: T): Observable<T> {
-		let resultSubject = new Subject<T>();
-
-		this._dsiDriver.update(resource, id, doc).first().subscribe((result: DsiApi.Response) => {
-			this._ngZone.run(() => {
-				resultSubject.next(result.data);
-			});
-		});
-
-		return resultSubject.asObservable();
+	public update(id: string, doc: D): Observable<number> {
+		return this._dsiDriver.update(this._config.resource, id, doc);
 	}
 
 }

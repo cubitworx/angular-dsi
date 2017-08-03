@@ -10,7 +10,7 @@
 			<div class="form-group">
 				<label for="field_2">Field 2</label>
 				<select id="field_2" class="form-control" formControlName="field_2">
-					<option *ngFor="let valuelist of _dsiRegistry.get('status').dataset" value="{{valuelist._key}}">{{valuelist._value}}</option>
+					<option *ngFor="let valuelist of _statuses.dataset" value="{{valuelist._key}}">{{valuelist._value}}</option>
 				</select>
 			</div>
 		</div>

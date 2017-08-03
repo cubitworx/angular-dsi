@@ -1,8 +1,8 @@
 import { DsiConfig } from '../../../src';
 
 // Local
-import { ModalOptions } from '../../support/modal.interface';
-import { NotificationOptions } from '../../support/notification.interface';
+import { ModalOptions } from '../../support/modal';
+import { NotificationOptions } from '../../support/notification';
 
 export interface AppDsiConfig extends DsiConfig {
 	createSuccess?: NotificationOptions;

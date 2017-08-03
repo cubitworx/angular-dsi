@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 
@@ -6,27 +6,31 @@ import { Observable, Subscription } from 'rxjs';
 import { Dsi } from './dsi';
 import { DsiApi } from './dsi.api';
 import { DsiConfig } from './dsi.config';
-import { DsiInterface } from './dsi.interface';
 import { TableSchema } from './support/schema';
 
+export type DsiFormGroupFactory = (id: Observable<string>, config: DsiConfig) => DsiFormGroup<any, any>;
+
 @Injectable()
-export class DsiFormGroup<T> implements DsiInterface<T> {
+export class DsiFormGroup<D, C extends DsiConfig> {
 
 	protected _formGroup: FormGroup;
+	protected _id: string;
 	protected _subscriptions: {
 		dsi?: Subscription
 	} = {};
 
 	public constructor(
-		protected _config: DsiConfig,
-		protected _dsi: Dsi<T>,
+		protected _config: C,
+		protected _dsi: Dsi<D, C>,
 		protected _formBuilder: FormBuilder,
-		protected _id: Observable<string>,
-		protected _ngZone: NgZone
+		protected _idObservable: Observable<string>
 	) {
 		this._createFromGroup(this._config.schema);
 
-		this._id.subscribe();
+		this._idObservable.subscribe((id: string) => {
+			this._id = id;
+			this._read({id});
+		});
 	}
 
 	public get formGroup(): FormGroup {
@@ -37,31 +41,15 @@ export class DsiFormGroup<T> implements DsiInterface<T> {
 		return this._config.id;
 	}
 
-	public create(doc: T): Observable<string> {
-		return this._dsi.create(this._config.resource, doc);
+	public create(doc: D): Observable<string> {
+		return this._dsi.create(doc);
 	}
 
-	public delete(id: string): Observable<number> {
-		return this._dsi.delete(this._config.resource, id);
-	}
+	public delete(): Observable<number> {
+		if (this._id)
+			return this._dsi.delete(this._id);
 
-	public read(reactive: boolean = false): DsiFormGroup<T> {
-		let
-		result: Observable<DsiApi.Response> = this._dsi.readOne(this._config.resource, {id: this._id}, reactive);
-
-		if( this._subscriptions.dsi )
-			this._subscriptions.dsi.unsubscribe();
-
-		if (!reactive)
-			result = result.first();
-
-		this._subscriptions.dsi = result.subscribe((response: DsiApi.Response) => {
-			this._ngZone.run(() => {
-				this._formGroup.patchValue(response.data, {emitEvent: false});
-			});
-		});
-
-		return this;
+		return Observable.of(0);
 	}
 
 	public stop(): void {
@@ -72,23 +60,25 @@ export class DsiFormGroup<T> implements DsiInterface<T> {
 		}
 	}
 
-	public update(id: string, doc: T): Observable<T> {
-		return this._dsi.update(this._config.resource, id, doc);
+	public update(doc: D): Observable<number> {
+		if (this._id)
+			return this._dsi.update(this._id, doc);
+		return Observable.of(0);
 	}
 
 	protected _createFromGroup(schema: TableSchema, doc: any = {}): FormGroup {
 		let controlsConfig: {[key: string]: any} = {};
 
-		for( let field in schema ) {
+		for (let field in schema) {
 
-			if( this._isSubDocument( schema[field].dataType ) ) {
+			if (this._isSubDocument( schema[field].dataType )) {
 				controlsConfig[field] = this._createFromGroup( schema[field].dataType, doc[field] );
 			} else {
 
 				controlsConfig[field] = [ doc[field] ];
-				if( schema[field].validators ) {
-					for( let validator in schema[field].validators ) {
-						switch( validator ) {
+				if (schema[field].validators) {
+					for (let validator in schema[field].validators) {
+						switch (validator) {
 							case 'required': {
 								controlsConfig[field].push( Validators.required );
 								break;
@@ -107,11 +97,28 @@ export class DsiFormGroup<T> implements DsiInterface<T> {
 	}
 
 	protected _isSubDocument(obj: Object): boolean {
-		for( let key in obj ) {
-			if( obj.hasOwnProperty( key ) )
+		for (let key in obj) {
+			if (obj.hasOwnProperty( key ))
 				return !!obj[key].dataType;
 		}
 		return false;
+	}
+
+	protected _read(request?: DsiApi.RequestOne, reactive: boolean = false): DsiFormGroup<D, C> {
+		let
+		result: Observable<DsiApi.Response> = this._dsi.readOne(request);
+
+		if (this._subscriptions.dsi)
+			this._subscriptions.dsi.unsubscribe();
+
+		if (!reactive)
+			result = result.first();
+
+		this._subscriptions.dsi = result.subscribe((response: DsiApi.Response) => {
+			this._formGroup.patchValue(response.data, {emitEvent: false});
+		});
+
+		return this;
 	}
 
 }

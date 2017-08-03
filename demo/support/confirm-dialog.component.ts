@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { DialogComponent, DialogService } from "ng2-bootstrap-modal";
+import { DialogComponent, DialogService } from 'ng2-bootstrap-modal';
 
 // Local
 import { ModalButton } from './modal';
@@ -12,7 +12,7 @@ export interface ConfirmModel {
 
 @Component({
 	selector: 'confirm-dialog',
-	templateUrl: './confirm.component.html'
+	templateUrl: './confirm-dialog.component.html'
 })
 export class ConfirmDialogComponent extends DialogComponent<ConfirmModel, boolean> implements ConfirmModel {
 
@@ -21,17 +21,17 @@ export class ConfirmDialogComponent extends DialogComponent<ConfirmModel, boolea
 		{text: 'Cancel', result: false}
 	];
 	public message: string;
-  public title: string;
+	public title: string;
 
-  constructor(
+	constructor(
 		dialogService: DialogService
 	) {
-    super(dialogService);
+		super(dialogService);
 	}
 
-  public confirm(result: boolean): void {
-    this.result = result;
-    this.close();
+	public confirm(result: boolean): void {
+		this.result = result;
+		this.close();
 	}
 
 }
