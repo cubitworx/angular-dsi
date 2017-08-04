@@ -4,7 +4,7 @@ import { DialogService } from 'ng2-bootstrap-modal';
 import { Observable, Subject } from 'rxjs';
 import * as _ from 'lodash';
 
-import { Dsi, DsiConfig, DsiDriver, DsiFactory, TableSchema } from '../../../src';
+import { Dsi, DsiConfig, DsiFactory, DsiRestDriver, TableSchema } from '../../../src';
 
 // Local
 import { ConfirmDialogComponent } from '../../support/confirm-dialog.component';
@@ -23,26 +23,26 @@ const instances: {[id: string]: Dsi<any, any>} = {};
 
 export function AppDsiFactory(
 	dialogService: DialogService,
-	dsiDriver: DsiDriver<any>,
+	dsiRestDriver: DsiRestDriver<any>,
 	notificationsService: NotificationsService
 ): DsiFactory {
 	return (config: DsiConfig): Dsi<any, any> => {
 		if (!instances[config.id])
-			instances[config.id] = new AppDsi(config, dialogService, dsiDriver, notificationsService);
+			instances[config.id] = new AppDsi(config, dialogService, dsiRestDriver, notificationsService);
 		return instances[config.id];
 	};
 }
 
-Injectable()
+@Injectable()
 export class AppDsi<D, C extends AppDsiConfig> extends Dsi<D, C> {
 
 	public constructor(
 		config: C,
 		protected _dialogService: DialogService,
-		dsiDriver: DsiDriver<D>,
+		dsiRestDriver: DsiRestDriver<D>,
 		protected _notificationsService: NotificationsService
 	) {
-		super(config, dsiDriver);
+		super(config, dsiRestDriver);
 	}
 
 	public create(doc: D): Observable<string> {

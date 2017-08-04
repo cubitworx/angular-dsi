@@ -3,21 +3,21 @@
 		<input type="text" class="form-control pull-right" (input)="_filter.next($event)" placeholder="Search" />
 	</caption>
 	<tr>
-		<th>Field 1</th>
-		<th>Field 2</th>
-		<th>Field 3</th>
+		<th>{{_events.schema.id.label}}</th>
+		<th>{{_events.schema.name.label}}</th>
+		<th>{{_events.schema.status.label}}</th>
 		<th>&nbsp;</th>
 	</tr>
-	<tr *ngFor="let doc of _events.dataset">
-		<td>{{doc.field_1}}</td>
-		<td>{{doc.field_2}}</td>
-		<td>{{doc.field_3}}</td>
+	<tr *ngFor="let doc of _events.asArray">
+		<td>{{doc.id}}</td>
+		<td>{{doc.name}}</td>
+		<td>{{doc.status}}</td>
 		<td>
 			<a [routerLink]="['/', doc._id]" class="btn btn-sm btn-subtle">
 				<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
 			</a>
-			<button type="button" (click)="_events.delete(doc._id)" class="btn btn-sm btn-remove">
-				<i class="fa fa-times" aria-hidden="true"></i>
+			<button type="button" (click)="_events.delete(doc._id)" class="btn btn-sm btn-danger">
+				X
 			</button>
 		</td>
 	</tr>

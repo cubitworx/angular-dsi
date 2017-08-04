@@ -1,6 +1,7 @@
 // Local
 import { AppDsiConfig } from '../lib/dsi/app.dsi.config';
 import { EventInterface, EventSchema } from '../model';
+import { apiEndPoint } from './config';
 
 export const EventDsiConfig: AppDsiConfig = {
 	createSuccess: {
@@ -16,7 +17,7 @@ export const EventDsiConfig: AppDsiConfig = {
 		message: 'Event has been deleted'
 	},
 	id: 'event',
-	resource: 'event',
+	resource: `${apiEndPoint}/event`,
 	schema: EventSchema,
 	updateSuccess: {
 		title: 'Success',

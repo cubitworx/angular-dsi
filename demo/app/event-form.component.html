@@ -2,15 +2,21 @@
 	<div class="row">
 		<div class="col-sm-6">
 			<div class="form-group">
-				<label for="field_1">Field 1</label>
-				<input type="text" class="form-control" id="field_1" placeholder="Field 1" formControlName="field_1" />
+				<label for="if">ID</label>
+				<input type="text" class="form-control" id="id" placeholder="ID" formControlName="id" readonly />
 			</div>
 		</div>
 		<div class="col-sm-6">
 			<div class="form-group">
-				<label for="field_2">Field 2</label>
-				<select id="field_2" class="form-control" formControlName="field_2">
-					<option *ngFor="let valuelist of _statuses.dataset" value="{{valuelist._key}}">{{valuelist._value}}</option>
+				<label for="name">Name</label>
+				<input type="text" class="form-control" id="name" placeholder="Name" formControlName="name" />
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="form-group">
+				<label for="status">Status</label>
+				<select id="status" class="form-control" formControlName="status">
+					<option *ngFor="let valuelist of _statuses.asArray" value="{{valuelist.id}}">{{valuelist.name}}</option>
 				</select>
 			</div>
 		</div>

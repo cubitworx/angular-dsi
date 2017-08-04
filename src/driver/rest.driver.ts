@@ -11,7 +11,7 @@ import { DsiDriver } from '../dsi.driver';
 @Injectable()
 export class DsiRestDriver<D> implements DsiDriver<D> {
 
-	protected _uri: string = '/api';
+	protected _url: string = '/api';
 
 	public constructor(
 		protected _ngZone: NgZone,
@@ -19,7 +19,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 	) { }
 
 	public create(resource: string, doc: D): Observable<string> {
-		return this._restHttpService.post(`${this._uri}/${resource}`, doc)
+		return this._restHttpService.post(resource, doc)
 			.map(response => {
 				return this._ngZone.run(() => response.data);
 			})
@@ -28,7 +28,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 	}
 
 	public delete(resource: string, id: string): Observable<number> {
-		return this._restHttpService.delete( `${this._uri}/${resource}/${id}` )
+		return this._restHttpService.delete( `${resource}/${id}` )
 			.map(response => {
 				return this._ngZone.run(() => response.data);
 			})
@@ -61,7 +61,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 		if (request.sort)
 			params.sort = request.sort.join(',');
 
-		return this._restHttpService.get(`${this._uri}/${resource}`, params)
+		return this._restHttpService.get(resource, params)
 			.map(response => {
 				return this._ngZone.run(() => response);
 			})
@@ -80,7 +80,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 		if (request.fields)
 				params.fields = request.fields;
 
-		return this._restHttpService.get(`${this._uri}/${resource}`, params)
+		return this._restHttpService.get(resource, params)
 			.map(response => {
 				return this._ngZone.run(() => response);
 			})
@@ -89,7 +89,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 	}
 
 	public update(resource: string, id: string, doc: any): Observable<number> {
-		return this._restHttpService.put(`${this._uri}/${resource}/${id}`, doc)
+		return this._restHttpService.put(`${resource}/${id}`, doc)
 			.map(response => {
 				return this._ngZone.run(() => response.data);
 			})

@@ -24,5 +24,12 @@ export const EventSchema: TableSchema = {
 		validators: {
 			required: true
 		}
+	},
+	status: {
+		dataType: Number,
+		label: 'Status',
+		validators: {
+			required: true
+		}
 	}
 }

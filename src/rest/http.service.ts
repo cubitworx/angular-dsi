@@ -53,7 +53,8 @@ export class HttpRestService implements RestInterface {
 						queryParams.push( `${name}=${params[name]}` );
 				}
 			}
-			url += ( url.search('?') ? '&' : '?' ) + queryParams.join('&');
+			if (queryParams.length)
+				url += ( url.search(/\?/) ? '&' : '?' ) + queryParams.join('&');
 		}
 		return url;
 	}

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 
 import { DsiDataset, DsiDatasetFactory, DsiFilter } from '../../src';
@@ -18,7 +18,7 @@ export class EventListComponent implements OnDestroy, OnInit {
 	protected _filter: Subject<Event>;
 
 	constructor(
-		protected _dsiDataset: DsiDatasetFactory,
+		@Inject(DsiDatasetFactory) protected _dsiDatasetFactory: DsiDatasetFactory,
 		protected _dsiFilter: DsiFilter
 	) { }
 
@@ -28,7 +28,7 @@ export class EventListComponent implements OnDestroy, OnInit {
 	}
 
 	public ngOnInit(): void {
-		this._events = this._dsiDataset(EventDsiConfig);
+		this._events = this._dsiDatasetFactory(EventDsiConfig).read();
 		this._filter = this._dsiFilter.dsi(EventDsiConfig.id, this._events);
 	}
 

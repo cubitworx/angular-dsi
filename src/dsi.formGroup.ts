@@ -3,12 +3,25 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 
 // Local
-import { Dsi } from './dsi';
+import { Dsi, DsiFactory } from './dsi';
 import { DsiApi } from './dsi.api';
 import { DsiConfig } from './dsi.config';
 import { TableSchema } from './support/schema';
 
 export type DsiFormGroupFactory = (id: Observable<string>, config: DsiConfig) => DsiFormGroup<any, any>;
+
+export function DsiFormGroupFactory(
+	dsiFactory: DsiFactory,
+	formBuilder: FormBuilder
+): DsiFormGroupFactory {
+	const instances: {[id: string]: DsiFormGroup<any, any>} = {};
+
+	return (id: Observable<string>, config: DsiConfig): DsiFormGroup<any, any> => {
+		if (!instances[config.id])
+			instances[config.id] = new DsiFormGroup(config, dsiFactory(config), formBuilder, id);
+		return instances[config.id];
+	};
+}
 
 @Injectable()
 export class DsiFormGroup<D, C extends DsiConfig> {

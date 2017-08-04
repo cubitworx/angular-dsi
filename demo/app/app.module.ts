@@ -1,15 +1,17 @@
-import { NgModule, NgZone } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { NgModule } from '@angular/core';
+import { HttpModule } from '@angular/http';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule }  from '@angular/platform-browser';
 import { NotificationsService } from 'angular2-notifications';
 import { BootstrapModalModule, DialogService } from 'ng2-bootstrap-modal';
 
-import { Dsi, DsiDataset, DsiDriver, DsiFilter, DsiFormGroup, HttpRestService } from '../../src';
+import {
+	Dsi, DsiFactory, DsiDataset, DsiDatasetFactory, DsiDriver, DsiFilter, DsiFormGroup,
+	DsiFormGroupFactory, DsiRestDriver, HttpRestService
+} from '../../src';
 
 // Local
 import { AppDsi, AppDsiFactory } from '../lib/dsi/app.dsi';
-import { AppDsiDatasetFactory } from '../lib/dsi/app.dsi.dataset';
-import { AppDsiFormGroupFactory } from '../lib/dsi/app.dsi.formGroup';
 import { AppHttpRestService } from '../lib/rest/app.http.service';
 import { ConfirmDialogComponent } from '../support/confirm-dialog.component';
 import { AppComponent } from './app.component';
@@ -31,15 +33,20 @@ import { appRouting } from './app.routing';
 	imports: [
 		appRouting,
 		BootstrapModalModule,
-		BrowserModule
+		BrowserModule,
+		FormsModule,
+		HttpModule,
+		ReactiveFormsModule
 	],
 	providers: [
-		{ provide: Dsi, useFactory: AppDsiFactory, deps: [DialogService, DsiDriver, NgZone, NotificationsService] },
-		{ provide: DsiDataset, useFactory: AppDsiDatasetFactory, deps: [AppDsi, NgZone] },
-		{ provide: DsiFormGroup, useFactory: AppDsiFormGroupFactory, deps: [AppDsi, FormBuilder, NgZone] },
+		{ provide: DsiFactory, useFactory: AppDsiFactory, deps: [DialogService, DsiRestDriver, NotificationsService] },
+		{ provide: DsiDatasetFactory, useFactory: DsiDatasetFactory, deps: [DsiFactory] },
+		{ provide: DsiFormGroup, useFactory: DsiFormGroupFactory, deps: [AppDsi, FormBuilder] },
 		{ provide: HttpRestService, useClass: AppHttpRestService },
 		DialogService,
-		DsiFilter
+		DsiFilter,
+		DsiRestDriver,
+		NotificationsService
 	]
 })
 export class AppModule { }

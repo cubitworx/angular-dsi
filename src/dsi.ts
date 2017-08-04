@@ -5,9 +5,22 @@ import { Observable, Subject } from 'rxjs';
 import { DsiApi } from './dsi.api';
 import { DsiConfig } from './dsi.config';
 import { DsiDriver } from './dsi.driver';
+import { DsiRestDriver } from './driver/rest.driver';
 import { TableSchema } from './support/schema';
 
 export type DsiFactory = (config: DsiConfig) => Dsi<any, any>;
+
+export function DsiFactory(
+	dsiRestDriver: DsiRestDriver<any>
+): DsiFactory {
+	const instances: {[id: string]: Dsi<any, any>} = {};
+
+	return (config: DsiConfig): Dsi<any, any> => {
+		if (!instances[config.id])
+			instances[config.id] = new Dsi(config, dsiRestDriver);
+		return instances[config.id];
+	};
+}
 
 @Injectable()
 export class Dsi<D, C extends DsiConfig> {
