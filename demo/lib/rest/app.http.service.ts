@@ -8,8 +8,6 @@ import { HttpRestService, RestApi } from '../../../src';
 @Injectable()
 export class AppHttpRestService extends HttpRestService {
 
-	protected _errors: any[] = [];
-
 	public constructor(
 		http: Http,
 		protected _notificationsService: NotificationsService
@@ -21,7 +19,6 @@ export class AppHttpRestService extends HttpRestService {
 		let errorObservable: ErrorObservable = super._handleError(response);
 
 		errorObservable.subscribe((error: RestApi.ResponseError) => {
-			this._errors.length = 0;
 
 			if (error.id === 'authentication-error') {
 				this._notificationsService.error('Permission denied', 'You do not have permission to perform this action');

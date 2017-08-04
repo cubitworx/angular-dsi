@@ -41,7 +41,7 @@ import { appRouting } from './app.routing';
 	providers: [
 		{ provide: DsiFactory, useFactory: AppDsiFactory, deps: [DialogService, DsiRestDriver, NotificationsService] },
 		{ provide: DsiDatasetFactory, useFactory: DsiDatasetFactory, deps: [DsiFactory] },
-		{ provide: DsiFormGroup, useFactory: DsiFormGroupFactory, deps: [AppDsi, FormBuilder] },
+		{ provide: DsiFormGroupFactory, useFactory: DsiFormGroupFactory, deps: [DsiFactory, FormBuilder] },
 		{ provide: HttpRestService, useClass: AppHttpRestService },
 		DialogService,
 		DsiFilter,

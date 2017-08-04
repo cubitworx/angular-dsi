@@ -97,7 +97,6 @@ export class DsiDataset<D, C extends DsiConfig> {
 	protected _refreshDataset(): void {
 		this._stale = false;
 		this._datasetBehaviorSubject.forEach((data: D[]) => {
-			console.log(data);
 			let iteration = ++this._iteration;
 			this._dataset.length = 0;
 			for (let doc of data) {

@@ -12,9 +12,15 @@ import { RestInterface } from './rest.interface';
 @Injectable()
 export class HttpRestService implements RestInterface {
 
+	protected _errors: any[] = [];
+
 	public constructor(
 		protected _http: Http
 	) { }
+
+	public get errors(): string[] {
+		return this._errors;
+	}
 
 	public delete(url: string, params?: {[name: string]: string}, requestOptions?: RequestOptionsArgs): Observable<DsiApi.Response> {
 		return this._http.delete(this._buildUrl(url, params), requestOptions || this._requestOptions())
@@ -54,32 +60,46 @@ export class HttpRestService implements RestInterface {
 				}
 			}
 			if (queryParams.length)
-				url += ( url.search(/\?/) ? '&' : '?' ) + queryParams.join('&');
+				url += ( ~url.indexOf('?') ? '&' : '?' ) + queryParams.join('&');
 		}
 		return url;
 	}
 
 	protected _handleError(response: Response|any): ErrorObservable {
+		let error: RestApi.ResponseError;
+
+		this._errors.length = 0;
+
 		if (response instanceof Response) {
 			try {
-				let error: RestApi.ResponseError = response.json();
+				error = response.json();
 				if (!error)
-					return Observable.throw({message: 'Error decoding response error'});
-				return Observable.throw(error);
+					error = {message: 'Error decoding response error'};
 			} catch (e) {
-				return Observable.throw({message: 'Unexpected error', data: e});
+				error = {message: 'Unexpected error', data: e};
 			}
+		} else {
+			error = {message: response.toString()};
 		}
 
-		return Observable.throw({message: response.toString()});
+		this._errors.push('An unexpected error has occured');
+		return Observable.throw(error);
 	}
 
 	protected _handleResponse(response: Response): RestApi.ResponseSuccess|ErrorObservable {
+		let error: RestApi.ResponseError;
+
 		try {
-			return response.json() || Observable.throw({message: 'Error decoding response'});
+			let responseJson = response.json();
+			if (responseJson)
+				return responseJson;
+			error = {message: 'Error decoding response'};
 		} catch (e) {
-			return Observable.throw({message: 'Unexpected error', data: e});
+			error = {message: 'Unexpected error', data: e};
 		}
+
+		this._errors.push('An unexpected error has occured');
+		return Observable.throw({message: 'Error decoding response'})
 	}
 
 	protected _requestOptions(): RequestOptionsArgs {

@@ -18,6 +18,10 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 		protected _restHttpService: HttpRestService
 	) { }
 
+	public get errors(): string[] {
+		return this._restHttpService.errors;
+	}
+
 	public create(resource: string, doc: D): Observable<string> {
 		return this._restHttpService.post(resource, doc)
 			.map(response => {
@@ -72,9 +76,7 @@ export class DsiRestDriver<D> implements DsiDriver<D> {
 	public readOne(resource: string, request?: DsiApi.RequestOne): Observable<DsiApi.Response> {
 		let params: {[name: string]: any} = {};
 
-		// Id
-		if (request.id)
-			params.id = request.id;
+		resource += `/${request.id}`;
 
 		// Fields
 		if (request.fields)

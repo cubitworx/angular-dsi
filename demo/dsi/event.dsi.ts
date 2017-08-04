@@ -17,6 +17,7 @@ export const EventDsiConfig: AppDsiConfig = {
 		message: 'Event has been deleted'
 	},
 	id: 'event',
+	primaryKey: 'id',
 	resource: `${apiEndPoint}/event`,
 	schema: EventSchema,
 	updateSuccess: {

@@ -8,7 +8,7 @@ import { DsiApi } from './dsi.api';
 import { DsiConfig } from './dsi.config';
 import { TableSchema } from './support/schema';
 
-export type DsiFormGroupFactory = (id: Observable<string>, config: DsiConfig) => DsiFormGroup<any, any>;
+export type DsiFormGroupFactory = (config: DsiConfig, id?: Observable<string>) => DsiFormGroup<any, any>;
 
 export function DsiFormGroupFactory(
 	dsiFactory: DsiFactory,
@@ -16,7 +16,7 @@ export function DsiFormGroupFactory(
 ): DsiFormGroupFactory {
 	const instances: {[id: string]: DsiFormGroup<any, any>} = {};
 
-	return (id: Observable<string>, config: DsiConfig): DsiFormGroup<any, any> => {
+	return (config: DsiConfig, id?: Observable<string>): DsiFormGroup<any, any> => {
 		if (!instances[config.id])
 			instances[config.id] = new DsiFormGroup(config, dsiFactory(config), formBuilder, id);
 		return instances[config.id];
@@ -36,14 +36,19 @@ export class DsiFormGroup<D, C extends DsiConfig> {
 		protected _config: C,
 		protected _dsi: Dsi<D, C>,
 		protected _formBuilder: FormBuilder,
-		protected _idObservable: Observable<string>
+		protected _idObservable?: Observable<string>
 	) {
-		this._createFromGroup(this._config.schema);
+		this._formGroup = this._createFromGroup(this._config.schema);
 
-		this._idObservable.subscribe((id: string) => {
-			this._id = id;
-			this._read({id});
-		});
+		if (this._idObservable) {
+			this._idObservable.subscribe((id: string) => {
+				this._read({id});
+			});
+		}
+	}
+
+	public get errors(): string[] {
+		return this._dsi.errors;
 	}
 
 	public get formGroup(): FormGroup {
@@ -54,8 +59,13 @@ export class DsiFormGroup<D, C extends DsiConfig> {
 		return this._config.id;
 	}
 
-	public create(doc: D): Observable<string> {
-		return this._dsi.create(doc);
+	public create(): Observable<string> {
+		this._idObservable = this._dsi.create(this._formGroup.value);
+		this._idObservable.map((id: string) => {
+			this._id = id;
+		});
+
+		return this._idObservable;
 	}
 
 	public delete(): Observable<number> {
@@ -63,6 +73,13 @@ export class DsiFormGroup<D, C extends DsiConfig> {
 			return this._dsi.delete(this._id);
 
 		return Observable.of(0);
+	}
+
+	public save(): Observable<string|number> {
+		if (this._id)
+			return this.update();
+		else
+			return this.create();
 	}
 
 	public stop(): void {
@@ -73,9 +90,9 @@ export class DsiFormGroup<D, C extends DsiConfig> {
 		}
 	}
 
-	public update(doc: D): Observable<number> {
+	public update(): Observable<number> {
 		if (this._id)
-			return this._dsi.update(this._id, doc);
+			return this._dsi.update(this._id, this._formGroup.value);
 		return Observable.of(0);
 	}
 
@@ -117,17 +134,12 @@ export class DsiFormGroup<D, C extends DsiConfig> {
 		return false;
 	}
 
-	protected _read(request?: DsiApi.RequestOne, reactive: boolean = false): DsiFormGroup<D, C> {
-		let
-		result: Observable<DsiApi.Response> = this._dsi.readOne(request);
-
+	protected _read(request?: DsiApi.RequestOne): DsiFormGroup<D, C> {
 		if (this._subscriptions.dsi)
 			this._subscriptions.dsi.unsubscribe();
 
-		if (!reactive)
-			result = result.first();
-
-		this._subscriptions.dsi = result.subscribe((response: DsiApi.Response) => {
+		this._subscriptions.dsi = this._dsi.readOne(request).subscribe((response: DsiApi.Response) => {
+			this._id = response.data[this._config.primaryKey];
 			this._formGroup.patchValue(response.data, {emitEvent: false});
 		});
 

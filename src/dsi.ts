@@ -30,6 +30,10 @@ export class Dsi<D, C extends DsiConfig> {
 		protected _dsiDriver: DsiDriver<D>
 	) { }
 
+	public get errors(): string[] {
+		return this._dsiDriver.errors;
+	}
+
 	public create(doc: D): Observable<string> {
 		return this._dsiDriver.create(this._config.resource, doc);
 	}

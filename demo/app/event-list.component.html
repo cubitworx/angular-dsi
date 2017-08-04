@@ -8,15 +8,31 @@
 		<th>{{_events.schema.status.label}}</th>
 		<th>&nbsp;</th>
 	</tr>
+	<!-- new -->
+	<tr [formGroup]="_newEvent.formGroup">
+		<td><input type="text" class="form-control" id="id" placeholder="ID" formControlName="id" /></td>
+		<td><input type="text" class="form-control" id="name" placeholder="Name" formControlName="name" /></td>
+		<td>
+			<select id="status" class="form-control" formControlName="status">
+				<option *ngFor="let valuelist of _statuses.asArray" value="{{valuelist.id}}">{{valuelist.name}}</option>
+			</select>
+		</td>
+		<td>
+			<button type="button" (click)="_newEvent.create()" class="btn btn-sm btn-success">
+				+
+			</button>
+		</td>
+	</tr>
+	<!-- list -->
 	<tr *ngFor="let doc of _events.asArray">
 		<td>{{doc.id}}</td>
 		<td>{{doc.name}}</td>
 		<td>{{doc.status}}</td>
 		<td>
-			<a [routerLink]="['/', doc._id]" class="btn btn-sm btn-subtle">
-				<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+			<a [routerLink]="['/event', doc.id]" class="btn btn-sm btn-default">
+				O
 			</a>
-			<button type="button" (click)="_events.delete(doc._id)" class="btn btn-sm btn-danger">
+			<button type="button" (click)="_events.delete(doc.id)" class="btn btn-sm btn-danger">
 				X
 			</button>
 		</td>

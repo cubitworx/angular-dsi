@@ -30,8 +30,8 @@ export class EventFormComponent implements OnDestroy, OnInit {
 	}
 
 	public ngOnInit(): void {
-		this._event = this._dsiFormGroupFactory(this._activatedRoute.params.map(params => params.id), EventDsiConfig);
-		this._statuses = this._dsiDatasetFactory(StatusDsiConfig);
+		this._event = this._dsiFormGroupFactory(EventDsiConfig, this._activatedRoute.params.map(params => params.id));
+		this._statuses = this._dsiDatasetFactory(StatusDsiConfig).read();
 	}
 
 }
